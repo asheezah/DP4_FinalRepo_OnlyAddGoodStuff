@@ -1,12 +1,6 @@
 import streamlit as st
 
 st.set_page_config(initial_sidebar_state="expanded", page_title="Maccessible")
-"""
-st.markdown("""
-    <style>
-        [data-testid="stSidebarNav"] {display: none;}
-    </style>
-""", unsafe_allow_html=True)"""
 
 
 
