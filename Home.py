@@ -241,37 +241,42 @@ def weather_widget():
     ##Call functions and assign the multitude of variables    
     def get_geocoords():
         user_location = get_geolocation()
+        error = False
+        user_latitude_get = 0
+        user_longitude_get = 0
         if user_location and 'error' in user_location:
-            if user_location['error']['code'] == 1:
-                st.error("Couldn't get location, sorry")
-            else: st.warning(f"Geolocation error: {user_location['error']['message']}")
+            error = True
         elif user_location:
-            user_latitude = user_location['coords']['latitude']
-            user_longitude = user_location['coords']['longitude']    
+            user_latitude_get = user_location['coords']['latitude']
+            user_longitude_get = user_location['coords']['longitude']
+            error = False
         user_location_json = get_page_location()
         index = 1
-        time.sleep(3)
-        return user_latitude, user_longitude, index
+        time.sleep(7)
+        return user_latitude_get, user_longitude_get, index, error
 
     ##Call functions and assign the multitude of variables    
     with st.spinner("Getting Geolocation..."):
         user_latitude, user_longitude, index = get_geocoords()
         st.toast("Found Geolocation!")
     
-    while True:
-        if index == 1:
-            celcius, conditions, next_hour_celcius, next_hour_conditions, change_in_celcius, change_in_conditons, rise_or_drop, city = setup_weather(str(user_latitude), str(user_longitude))
-            trisk, crisk, temp_risk, cond_risk, next_hour_crisk  = risk_evaluation(celcius, conditions)
-            with st.container(border=True):
-                st.header("Displaying weather for " + str(city))
-                col1, col2 = st.columns(2)
-                with col1:
-                    with st.container(border=True):
-                        display_temp()
-                with col2:
-                    with st.container(border=True):
-                        display_cond()
-            break
+    if error == False:
+        while True:
+            if index == 1:
+                celcius, conditions, next_hour_celcius, next_hour_conditions, change_in_celcius, change_in_conditons, rise_or_drop, city = setup_weather(str(user_latitude), str(user_longitude))
+                trisk, crisk, temp_risk, cond_risk, next_hour_crisk  = risk_evaluation(celcius, conditions)
+                with st.container(border=True):
+                    st.header("Displaying weather for " + str(city))
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        with st.container(border=True):
+                            display_temp()
+                    with col2:
+                        with st.container(border=True):
+                            display_cond()
+                break
+    else:
+        st.error("Could Not Get Access to Geolocation, Weather Unavailable")
 
 def home_page():
     
