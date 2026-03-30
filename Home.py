@@ -304,7 +304,7 @@ def home_page():
     
     st.markdown("""
         <style>
-            iframe {display: none;}
+            <div class="st-emotion-cache-8atqhb eol2nw90 {display: none;}
         </style>
     """, unsafe_allow_html=True)
 # <div class="st-emotion-cache-8atqhb eol2nw90" style="
