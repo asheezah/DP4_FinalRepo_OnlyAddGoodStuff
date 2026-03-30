@@ -278,6 +278,7 @@ def home_page():
     st.sidebar.page_link("pages/Dr McDonald's Contact Info.py", label =
                          "Dr McDonald's Contact Info", icon = '💯')
 
+    weather_widget()
     st.space("small")
     st.balloons()
     to_map = st.button("Take me to Map!", icon = '➡️', width="stretch")
@@ -290,4 +291,3 @@ def home_page():
         give_feedback()
             
 home_page()
-weather_widget()
