@@ -291,7 +291,7 @@ def home_page():
     if feedback:
         give_feedback()
             
-home_page()
+
 
 # Returns user's location after asking for permission
 location = get_geolocation()
@@ -310,3 +310,5 @@ elif location:
 
 # The URL parts of the page
 location_json = get_page_location()
+
+home_page()
