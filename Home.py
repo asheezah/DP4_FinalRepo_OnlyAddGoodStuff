@@ -239,16 +239,18 @@ def weather_widget():
                 st.success(cond_risk)
 
     def get_geocoords():
-        user_location = get_geolocation()
-
-        if user_location and 'error' in user_location:
-            if user_location['error']['code'] == 1:
-                st.error("Couldn't get location, sorry")
-            else: st.warning(f"Geolocation error: {user_location['error']['message']}")
-        elif user_location:
-            user_latitude = user_location['coords']['latitude']
-            user_longitude = user_location['coords']['longitude']    
-        user_location_json = get_page_location()
+        try:
+            user_location = get_geolocation()
+            if user_location and 'error' in user_location:
+                if user_location['error']['code'] == 1:
+                    st.error("Couldn't get location, sorry")
+                else: st.warning(f"Geolocation error: {user_location['error']['message']}")
+            elif user_location:
+                user_latitude = user_location['coords']['latitude']
+                user_longitude = user_location['coords']['longitude']    
+            user_location_json = get_page_location()
+        except:
+            print("Failed")
         return user_latitude, user_longitude
 
     ##Call functions and assign the multitude of variables    
