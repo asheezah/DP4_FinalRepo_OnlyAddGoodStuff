@@ -280,7 +280,7 @@ def home_page():
 
     weather_widget()
     st.space("small")
-    st.balloons()
+    #st.balloons()
     to_map = st.button("Take me to Map!", icon = '➡️', width="stretch")
     if to_map:
         st.switch_page("pages/Map.py")
