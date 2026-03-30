@@ -257,7 +257,7 @@ def weather_widget():
 
     ##Call functions and assign the multitude of variables    
     with st.spinner("Getting Geolocation..."):
-        user_latitude, user_longitude, index = get_geocoords()
+        user_latitude, user_longitude, index, error = get_geocoords()
         st.toast("Found Geolocation!")
     
     if error == False:
