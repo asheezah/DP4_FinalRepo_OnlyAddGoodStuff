@@ -304,7 +304,7 @@ def home_page():
     
     st.markdown("""
         <style>
-            [data-testid="stCustomComponentV1 st-emotion-cache-1tvzk6f edxyb2x0"] {display: none;}
+            [data-testid="st-emotion-cache-1vo6xi6"] {display: none;}
                 
         </style>
     """, unsafe_allow_html=True)
