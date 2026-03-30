@@ -9,15 +9,6 @@ from folium.raster_layers import ImageOverlay
 from streamlit_folium import st_folium
 from streamlit_js_eval import get_geolocation, get_page_location
 
-#dictionary of places
-places = [{"name": "lot B1", "long":43.263110,"lat": -79.916789, "type": "parking"},
-          {"name": "lot B2", "long": 43.263243, "lat": -79.916671, "type": "parking"},
-          {"name": "lot C", "long": 43.264228, "lat": -79.916091, "type": "parking"},
-          {"name":"elevator1", "long": 43.263744, "lat": -79.917353, "type": "elevator"},
-          {"name":"elevator2", "long": 43.263735, "lat":-79.917796, "type": "elevator"},
-          {"name": "elevator3", "long":43.263194, "lat": -79.917619, "type": "elevator"},
-          {"name": "centre", "long": 43.263407, "lat": -79.917609, "type": "centre"}]
-
 def get_geocoords():
     user_location = get_geolocation()
     if user_location and 'error' in user_location:
@@ -29,6 +20,20 @@ def get_geocoords():
         user_longitude = user_location['coords']['longitude']    
     user_location_json = get_page_location()
     return user_latitude, user_longitude
+
+user_latitude, user_longitude = get_geocoords()
+
+#dictionary of places
+places = [{"name": "lot B1", "long":43.263110,"lat": -79.916789, "type": "parking"},
+          {"name": "lot B2", "long": 43.263243, "lat": -79.916671, "type": "parking"},
+          {"name": "lot C", "long": 43.264228, "lat": -79.916091, "type": "parking"},
+          {"name":"elevator1", "long": 43.263744, "lat": -79.917353, "type": "elevator"},
+          {"name":"elevator2", "long": 43.263735, "lat":-79.917796, "type": "elevator"},
+          {"name": "elevator3", "long":43.263194, "lat": -79.917619, "type": "elevator"},
+          {"name": "centre", "long": 43.263407, "lat": -79.917609, "type": "centre"},
+          {"name": "current location", "long": user_longitude, "lat": user_latitude, "type": "centre"}]
+
+
 
 def backend_main():
     st.title(":fast_forward: Welcome to the Map! :rewind:", text_alignment='center')
@@ -49,12 +54,9 @@ def backend_main():
     custom_map = {"parking":{"icon": parking_icon},
               "elevator":{"icon": elevator_icon}, "centre":{"icon":centre_icon}}
 
-    user_latitude, user_longitude = get_geocoords()
 
     for i in range(len(places)):
         select.append(places[i]["name"])
-    current_location = {"name": "current location", "long": user_latitude, "lat": user_longitude, "type": "centre"}
-    select.append(current_location)
     location = st.selectbox("Select your **current** location:", select)
     destination = st.selectbox("Select your **desired** destination:", select)
 
