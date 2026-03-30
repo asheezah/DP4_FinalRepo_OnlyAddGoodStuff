@@ -44,8 +44,6 @@ def give_feedback():
         
         return index
 
-
-
     subject = st.text_input("Subject", max_chars=100, placeholder="Begin Typing")
     body = st.text_area("Body", max_chars=500, placeholder="Begin Typing")
     ratings = [1,2,3,4,5]
@@ -123,8 +121,6 @@ def weather_widget():
         else:
             next_hour_conditons = str(query['forecast']['forecastday'][1]['hour'][1]['condition']['text']).strip()
             next_hour_celcius = query['forecast']['forecastday'][1]['hour'][1]['temp_c']
-
-
 
         ##Compute the difference in temperatues to see if there was a change
         change_in_celcius = round(next_hour_celcius - celcius,2)
@@ -327,5 +323,4 @@ def home_page():
     if feedback:
         give_feedback()
             
-
 home_page()
