@@ -5,7 +5,7 @@ from streamlit_extras.floating_button import *
 from streamlit_js_eval import get_geolocation, get_page_location
 from geopy.geocoders import Nominatim
 
-from functions import sidebar, help_button
+from functions import sidebar, help_button, get_geocoords_func
 
 def weather():
 
@@ -195,25 +195,10 @@ def weather():
                     with st.container(border=True):
                         display_cond()
 
-    def get_geocoords():
-        user_location = get_geolocation()
-        error = False
-        user_latitude_get = 0
-        user_longitude_get = 0
-        if user_location and 'error' in user_location:
-            error = True
-        elif user_location:
-            user_latitude_get = user_location['coords']['latitude']
-            user_longitude_get = user_location['coords']['longitude']
-            error = False
-        user_location_json = get_page_location()
-        return user_latitude_get, user_longitude_get, error
-
-
     ##Call functions and assign the multitude of variables
     with st.spinner("Working on it..."): 
         time.sleep(0.5)
-        user_latitude, user_longitude, error = get_geocoords()     
+        user_latitude, user_longitude, error = get_geocoords_func()     
         if error == False:
             
             if user_latitude and user_longitude != 0:

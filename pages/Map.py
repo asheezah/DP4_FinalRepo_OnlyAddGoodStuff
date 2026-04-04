@@ -20,10 +20,6 @@ import networkx as nx
 
 from functions import sidebar, help_button, get_geocoords_func
 
-#def geocoords_load():
- #   user_latitude, user_longitude, error = get_geocoords_func()
-  #  return user_latitude, user_longitude, error
-
 def weather_warning(user_latitude, user_longitude, error):
 
     ##Gets current time of users device
