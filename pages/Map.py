@@ -187,7 +187,7 @@ def backend_main():
     fg = folium.FeatureGroup(name="markers")
 
     outMUSC = make_map()
-    G, places = init_graph('DP4 Node Locations - Nodes.csv', 'DP4 Node Locations - Edges.csv') #create network of nodes and edges
+    G, places = init_graph('pages/DP4 Node Locations - Nodes.csv', 'pages/DP4 Node Locations - Edges.csv') #create network of nodes and edges
     user_node_name = init_location(G, user_coords, outMUSC, st.session_state["marker"]) #plots user location on map, and initalizes a node for the user in the graph
 
     select = []
