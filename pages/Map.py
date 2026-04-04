@@ -468,7 +468,7 @@ def backend_main():
                 </style>""", unsafe_allow_html = True)
     weather_warning()
 
-user_latitude, user_longitude, error = get_geocoords_func
+user_latitude, user_longitude, error = geocoords_load()
 sidebar()
 help_button()
 backend_main(user_latitude, user_longitude, error)
