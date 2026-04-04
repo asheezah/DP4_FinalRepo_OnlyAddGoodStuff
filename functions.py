@@ -55,7 +55,7 @@ def help_button():
                 st.page_link("pages/Feedback.py",label=":blue[Feeback Form]")
         st.subheader("About Maccessible")
         with st.expander("Who made this epic app?"):
-            st.write("Maccessible was made by 4 ambious first-year iBioMed students for a class project!")
+            st.write("Maccessible was made by 4 ambitious first-year iBioMed students for a class project!")
             q3col1, q3col2 = st.columns([1,3])
             with q3col1:
                 st.write('Read more here: ')
