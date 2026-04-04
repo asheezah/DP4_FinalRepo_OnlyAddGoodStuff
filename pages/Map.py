@@ -1,5 +1,4 @@
 import streamlit as st
-#testing
 
 #import statements
 import folium
@@ -8,7 +7,10 @@ import numpy
 from folium.raster_layers import ImageOverlay
 from streamlit_folium import st_folium
 from streamlit_js_eval import get_geolocation, get_page_location
+import pandas as pd
+import networkx as nx
 
+#1: GET GEOLOCATION
 def get_geocoords():
     user_location = get_geolocation()
     if user_location and 'error' in user_location:
@@ -19,121 +21,235 @@ def get_geocoords():
         user_latitude = user_location['coords']['latitude']
         user_longitude = user_location['coords']['longitude']    
     user_location_json = get_page_location()
-    return user_latitude, user_longitude
+    return (user_latitude, user_longitude)
 
-user_latitude, user_longitude = get_geocoords()
 
-#dictionary of places
-places = [{"name": "lot B1", "long":43.263110,"lat": -79.916789, "type": "parking"},
-          {"name": "lot B2", "long": 43.263243, "lat": -79.916671, "type": "parking"},
-          {"name": "lot C", "long": 43.264228, "lat": -79.916091, "type": "parking"},
-          {"name":"elevator1", "long": 43.263744, "lat": -79.917353, "type": "elevator"},
-          {"name":"elevator2", "long": 43.263735, "lat":-79.917796, "type": "elevator"},
-          {"name": "elevator3", "long":43.263194, "lat": -79.917619, "type": "elevator"},
-          {"name": "centre", "long": 43.263407, "lat": -79.917609, "type": "centre"},
-          {"name": "current location", "long": float(user_latitude), "lat": float(user_longitude), "type": "current"}]
+#2: MAP
+def make_map():
+    outMUSC = folium.Map(location = (43.263407,-79.917609), tiles="CartoDB Positron", zoom_start=20) #initalizes map, centred at MUSC
+    musc1 = 'MUSC.png'
+    name = 'Floor Plan 1'
+    bounds = [[43.263106,-79.918454],[43.263827,-79.917165]] #bounds for the floor map overlap
+    folium.raster_layers.ImageOverlay(image = musc1, #overlays a floor map png onto the base map
+                                  bounds = bounds,
+                                  name = name
+                                  ).add_to(outMUSC)
+    
+    #Return map object
+    return outMUSC
 
+#3: NODES
+def dist(Source, Target): #find the distance between two points/nodes, written in the format: source = (lat, long), target...
+    return ((Source[0]-Target[0])**2 + (Source[1]-Target[1])**2)**0.5
+
+def init_graph(node_file, edge_file): #uses networkx to initalize nodes and edges
+    G = nx.Graph() #create G, which the graph object for networkx
+    node_fields = ['name','lat','long','type'] #column titles in excel file
+    nodes = pd.read_csv(node_file,usecols=node_fields) #reads through excel file, using column titles
+    places = {
+        types:group[['name','lat','long','type']].to_dict(orient='records')
+        for types, group in nodes.groupby('type')
+        } #creates a dictionary, organizing them based on type
+    
+    #initalizes node in graph
+    for i in range(len(nodes['name'])): #loops through G to add each node, with name, position (lat, long), and type
+        G.add_node(nodes['name'][i], 
+                   pos = (nodes['lat'][i], nodes['long'][i]), 
+                   type = nodes['type'][i])
+        
+    #adds list of edges
+    values = pd.read_csv(edge_file, usecols=['Source', 'Target']) #reads through another excel file, using column titles
+    
+    lists = {'Source': values['Source'].tolist(), #creates a list of both columns, with each column keyed to the column header
+             'Target': values['Target'].tolist()}
+    
+    for i in range(len(lists['Source'])):
+        source = lists['Source'][i] #goes through the list of edges, and retrieves the name of each corresponding source and target
+        target = lists['Target'][i]
+
+        source_pos = G.nodes[source]['pos'] #uses the names we just retrieved to get the coordinates associated with those nodes
+        target_pos = G.nodes[target]['pos']
+
+        edge_weight = dist(source_pos, target_pos) #calculates the distance between the two nodes, which will be used as weight
+        G.add_edge(lists['Source'][i], lists['Target'][i], weight=edge_weight) #loops through list of edges, adding each edge to the graph
+    return G, places #returns the graph object and places, which has each node location and type
+
+def init_location(G, user_coords, outMUSC, state): #user_coords needs to be (lat, long)
+    state.insert(0,
+        folium.Marker(location = user_coords, #creates a marker for the user's location, using geolocation
+                              tooltip="Click me!",
+                              popup = f"This is your location",
+                              icon = folium.Icon(color = "green")
+                              ))
+    user_node_name = 'Start Node' #all nodes need to have a string name associated with their position coordinates
+    G.add_node(user_node_name, pos=user_coords)
+    return user_node_name
+
+#4A: DISPLAY
+def customize_image(destination): #matches custom folium icons to the key in the dictionary (type of location)
+    if destination == 'elevator':
+        image = 'ELEVATOR.png'
+    elif destination == 'stairs':
+        image = 'STAIRS.png'
+    elif destination == 'exit':
+        image = 'EXIT.png'
+    elif destination == 'parking':
+        image = 'PARKING.png'
+    elif destination == 'washroom':
+        image = 'WASHROOM.png'
+    elif destination == 'ramp':
+        image = 'RAMP.png'
+    elif destination == 'food':
+        image = 'FOOD.png'
+    return image #returns the specific png, so that it can be called inputted later 
+
+def customize_icon(image): #defines custom icon
+    icon = folium.CustomIcon(
+        image,
+        icon_size = (31,31),
+        icon_anchor = (15.5,15.5),
+        popup_anchor = (-3,20))
+    return icon
+
+def display_markers(outMUSC, places, destination, state): #displays all locations of a specific category (ex. all elevators)
+    image = customize_image(destination)
+
+    for i in places.get(destination,[]):
+        icon = customize_icon(image)
+
+        state.append(
+            folium.Marker(
+            location=[i['lat'], i['long']],
+            tooltip=i['name'],
+            icon=icon
+        ))
+
+#4B: SHORTEST PATH
+def find_closest_node(G, user_node_name): #pulls coordinates from nx graph, then initalizes edge to closest node
+    user_pos = G.nodes[user_node_name]['pos']
+    best_dis = float('inf')
+    closest_node_name = None
+    for node in G.nodes: #iterates through every node and finds the closest one
+        if node == user_node_name:
+            continue
+        node_pos = G.nodes[node]['pos']
+        distance = dist(user_pos, node_pos)
+        if distance < best_dis: 
+            best_dis = distance
+            closest_node_name = node
+    G.add_edge(user_node_name, closest_node_name, weight = best_dis) #initalizes edge, so that the geolocation node can be connected to the graph
+
+def find_shortest_path(G, user_node_name, destination, heuristic, places): #returns shortest path out of specified type (ex. elevator)
+    best_path = float('inf')
+    for des in places[destination]: #places['destination'] opens list of all ex. elevators, des = elevator1, etc
+        target_name = des['name']
+        possible_path = nx.astar_path_length(G, user_node_name, target_name, heuristic = heuristic, weight = 'weight')
+        if possible_path < best_path:
+            best_path = possible_path
+            closest_location = target_name #closest_location is the name of the node that leads to the shortest path
+    return closest_location
+
+def shortest_path(G, user_node_name, closest_location, heuristic): #returns nodes of shortest path
+    return nx.astar_path(G, user_node_name, closest_location, heuristic = heuristic, weight = 'weight')
+    
+def display_path(G, path, outMUSC, closest_location, image, destination, state, route): #display path and marker at destination
+    coords = []
+    for i in path: #output of shortest path function
+        temp_list = G.nodes[i]['pos']
+        coords.append(temp_list)
+    route.append(folium.PolyLine(coords, smooth_factor = 50))
+    image = customize_image(destination) #matches the image to the type of destination
+    icon = customize_icon(image) #creates an icon for that destination
+    state.append(
+        folium.Marker(location = G.nodes[closest_location]['pos'], #creates marker at destination
+                  tooltip="Click me!",
+                  popup = f"This is your destination: {closest_location}",
+                  icon = icon
+                  ))
 
 
 def backend_main():
     st.title(":fast_forward: Welcome to the Map! :rewind:", text_alignment='center')
     st.divider()
+
+    #Coordinates hardcoded for testing purposes
+    #user_coords = get_geocoords()
+    user_coords = [43.263407,-79.917609]
+
+    #Intialize a session state for markers so that they appear on map across reruns
+    #initialize a session state for the polyline (pathfinding) route so that it appears across reruns
+    if 'route' not in st.session_state:
+        st.session_state['route'] = []
+    if 'marker' not in st.session_state:
+        st.session_state['marker'] = []
+
+    #Create a feature group for markers (so that the map doesn't have to reload as markers are added and removed)
+    fg = folium.FeatureGroup(name="markers")
+
     outMUSC = make_map()
+    G, places = init_graph('DP4 Node Locations - Nodes.csv', 'DP4 Node Locations - Edges.csv') #create network of nodes and edges
+    user_node_name = init_location(G, user_coords, outMUSC, st.session_state["marker"]) #plots user location on map, and initalizes a node for the user in the graph
+
     select = []
-    parking_image = 'pages/PARKING.png'
-    elevator_image = 'pages/Elevator 2.png'
-    map_ready1 = False
-    map_ready2 = False
-    marker_data = []
+    map_ready = False
 
-    #Intialize a session state
-    if 'selected_marker' not in st.session_state:
-        st.session_state['selected_marker'] = {"name": 'lot B1', "long":43.263110,"lat": -79.916789, "type": "parking"}
-    
-    parking_icon, centre_icon, elevator_icon = customize_icon(parking_image,elevator_image)
-    custom_map = {"parking":{"icon": parking_icon},
-              "elevator":{"icon": elevator_icon}, "centre":{"icon":centre_icon}}
-
-
-    for i in range(len(places)):
-        select.append(places[i]["name"])
-    location = st.selectbox("Select your **current** location:", select)
+    #Get user locations with dropdown menu, from the node csv file
+    for i in list(places.keys()):
+        #Hallway is a node, but we don't want the user to select it
+        if i != 'hallway':
+            select.append(i)
     destination = st.selectbox("Select your **desired** destination:", select)
 
-    if location == destination:
-        st.write("Invalid, try again...")
-    else:
-        #Put Markers for the current location
-        for place in places:
-            if place["name"] == location:
-                long1 = place.get("long")
-                lat1 = place.get("lat")
-                loc = [long1,lat1]
-                folium.Marker(location = loc,
-                              tooltip="Click me!",
-                              popup = f"This is your location: {location}",
-                              icon = folium.Icon(colour = "green")
-                              ).add_to(outMUSC)
-                map_ready1 = True
-            elif place["name"] == destination:
-                long2 = place.get("long")
-                lat2 = place.get("lat")
-                des = [long2,lat2]
-                info = custom_map[place["type"]]
-                icon = info["icon"]
-                folium.Marker(location = des,
-                              tooltip="Click me!",
-                              popup = f"This is your destination: {destination}",
-                              icon = icon).add_to(outMUSC)
-                map_ready2 = True
-        if map_ready1 and map_ready2:
-            st.write("Check the map!")
-            map_overlay(outMUSC) #adds map overlay picture
-            st_data = st_folium(outMUSC)
-            st.write(st_data)
+    #Determine mode
+    #MODE: either display all markers of that types (e.g. all elevators)
+    #OR find and display  shortest path
+    organize = st.columns(2)
+    display = organize[0].button("Display All " + destination, key = "display_mode", help = "Show all features of specified category on map", width = "content")
+    sp = organize[1].button("Find Shortest Path to " + destination,  key = "sp_mode", help = "Navigate to desired feature", width = "content")
 
-##    map_overlay(outMUSC) #adds map overlay picture
-##    #create_line(loc,des,outMUSC) #visually draws a path
-##
-##    outMUSC.save("test_map.html")
-##    #webbrowser.open_new("test_map.html") #opens the map file in your default browser
+    if sp:
+        #clear session states so that every time the user selects something new, the previous option they selected is not present as well
+        st.session_state["marker"] = [st.session_state["marker"][0]]
+        st.session_state["route"] = []
+        find_closest_node(G,user_node_name)
+        def heuristic(source,target): #heuristic has to be formatting in a specific way for networkx to function, so it can't have G as an arg.
+            x1, y1 = G.nodes[source]['pos'] #therefore, it has to be defined in main()
+            x2, y2 = G.nodes[target]['pos']
+            return ((x1-x2)**2 + (y1-y2)**2)**0.5
+        closest_location = find_shortest_path(G, user_node_name, destination, heuristic, places)
+        path = shortest_path(G, user_node_name, closest_location, heuristic)
+        image = customize_image(destination) #function is reused from toggle code, for simplicity
+        display_path(G, path, outMUSC, closest_location, image, destination, st.session_state["marker"], st.session_state["route"])
+        map_ready = True
+    if display:
+        #clear session states so that every time the user selects something new, the previous option they selected is not present as well
+        st.session_state["route"] = []
+        #We want to clear the marker session state, but keep the marker that indicates user location still there
+        st.session_state["marker"] = [st.session_state["marker"][0]]
 
-def make_map():
-    outMUSC = folium.Map(location = (43.263407,-79.917609), zoom_start=19)
-    return outMUSC
+        display_markers(outMUSC, places, destination, st.session_state["marker"]) #display mode relies only on the key, ex. elevators not any specific location
+        #display_markers is essentially a 'mini main()', which is why the code is shorter here
+        map_ready = True
+    st.write("Check the map!")
 
-def customize_icon(parking_image,elevator_image):
-    #Parking
-    parking_icon = folium.CustomIcon(
-        parking_image,
-        icon_size = (31,31),
-        icon_anchor = (15.5,15.5),
-        popup_anchor = (-3,20))
-    #Centre
-    centre_icon = folium.Icon(icon = "star",
-            color = "orange")
-    #Elevator
-    elevator_icon = folium.CustomIcon(
-        elevator_image,
-        icon_size = (31,31),
-        icon_anchor = (15.5,15.5),
-        popup_anchor = (-3,20))
-    return parking_icon, centre_icon, elevator_icon
+    #Add the markers to the feature group so that they can be displayed together, and added and removed without reloading the entire map
+    for m in st.session_state["marker"]:
+        m.add_to(fg)
+    
+    #Add the polyline to the map, if it exists
+    for r in st.session_state['route']:
+        r.add_to(outMUSC)
 
-def map_overlay(outMUSC):
-    #plants a picture overlay
-    musc1 = 'pages/MUSC 3.png'
-    bounds = [[43.263106,-79.918454],[43.263827,-79.917165]]
-    name = 'Floor Plan 1',
+    #Using the streamlit-folium library to integrate the folium map into the streamlit website
+    st_data = st_folium(outMUSC, feature_group_to_add = fg, width=1200, height=500)
+    st.write(st_data)
 
-    # bounds = [[sw_lat, sw_lon], [ne_lat, nw_lon]
-    folium.raster_layers.ImageOverlay(image = musc1,
-                                  bounds = bounds,
-                                  name = name
-                                  ).add_to(outMUSC)
+    #some random json text kept showing up underneath so this html code is to get rid of that, good riddance
+    st.markdown("""
+                <style>
+                [data-testid="stJson"] {display: none;}
 
-#creates a straight line connecting location and destination
-##def create_line(loc,des,outMUSC):
-##    folium.PolyLine([loc, des], tooltip = "Coast").add_to(outMUSC)
+                </style>""", unsafe_allow_html = True)
+
 
 backend_main()
