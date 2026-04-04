@@ -153,20 +153,6 @@ def report():
 
     st.title("Report")
 
-    def get_geocoords():
-        user_location = get_geolocation()
-        error = False
-        user_latitude_get = 0
-        user_longitude_get = 0
-        if user_location and 'error' in user_location:
-            error = True
-        elif user_location:
-            user_latitude_get = user_location['coords']['latitude']
-            user_longitude_get = user_location['coords']['longitude']
-            error = False
-        user_location_json = get_page_location()
-        return user_latitude_get, user_longitude_get, error
-
     def send_an_email(problem, affected, prob_body, affect_body, user_location):
         index = 0
 
@@ -490,7 +476,8 @@ def backend_main():
                 </style>""", unsafe_allow_html = True)
     weather_warning()
 
-report()
+if st.popover("Report Discrepancy"):
+    report()
 sidebar()
 help_button()
 backend_main()
