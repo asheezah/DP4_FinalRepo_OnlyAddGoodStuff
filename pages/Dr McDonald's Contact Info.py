@@ -1,4 +1,5 @@
 import streamlit as st
+from functions import sidebar, help_button
 
 def contact_us():
     
@@ -14,4 +15,5 @@ def contact_us():
 
     col1.write("Disclaimer: Permission has been sought to use this epic photo.")
 
+sidebar()
 contact_us()
