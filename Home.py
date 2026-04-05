@@ -18,12 +18,11 @@ def home():
     sidebar()
 
     st.image("pages/summit!.png")
-    st.divider()
+
     st.markdown("""
-            <h2 style = "text-align: center; color: maroon;">The Peak of Accessibility</h2>
-            <h5 style = "text-align: center; color: orange">*Currently only available at McMaster University*</h5>
+            <h5 style = "text-align: center; color: orange">**Currently only available at McMaster University**</h5>
         """, unsafe_allow_html=True)
-    st.divider()
+
     to_map = st.button("Go to the Map!", use_container_width=True)
     if to_map:
         st.switch_page("pages/Map.py")
