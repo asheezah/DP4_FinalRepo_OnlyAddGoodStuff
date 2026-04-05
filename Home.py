@@ -17,7 +17,7 @@ def home():
     #unfortunately don't have emojis
     sidebar()
 
-    st.image("pages/summit.png")
+    st.image("pages/summit!.png")
     st.divider()
     st.markdown("""
             <h2 style = "text-align: center; color: maroon;">The Peak of Accessibility</h2>
