@@ -95,7 +95,7 @@ def weather_warning(user_latitude, user_longitude, error):
         
         ##Condition Risk
         crisk = False
-        dangerous_conditions = ["Thunderstorm", "thunderstorm", "Squall", "squal", "Freezing", "freezing", "Rain", "rain", "Snow", "snow", "Fog", "fog", "Drizzle", "drizzle"]
+        dangerous_conditions = ["Thunderstorm", "thunderstorm", "Squall", "squall", "Freezing", "freezing", "Rain", "rain", "Snow", "snow", "Fog", "fog", "Drizzle", "drizzle"]
         next_hour_crisk = False        
         for i in adjusted_next_hour_conditions:
             for j in dangerous_conditions:
@@ -407,7 +407,7 @@ def backend_main():
     for i in list(places.keys()):
         #Hallway is a node, but we don't want the user to select it
         if i != 'hallway':
-            select.append(i)
+            select.append(i.capitalize())
     destination = st.selectbox("Select your **desired** destination:", select)
 
     #Determine mode

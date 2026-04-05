@@ -52,7 +52,7 @@ def help_button():
             with q2col1:
                 st.write('Or just click here: ')
             with q2col2:
-                st.page_link("pages/Feedback.py",label=":blue[Feeback Form]")
+                st.page_link("pages/Feedback.py",label=":blue[Feedback Form]")
         st.subheader("About Maccessible")
         with st.expander("Who made this epic app?"):
             st.write("Maccessible was made by 4 ambitious first-year iBioMed students for a class project!")
