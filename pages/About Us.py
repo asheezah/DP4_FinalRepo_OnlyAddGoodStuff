@@ -7,8 +7,8 @@ from functions import sidebar, help_button
 def about_us():
     st.title("Meet the Team")
     st.divider()
-    sep = st.columns([3,2.7])
-    sep[0].markdown("""**It's a :fire: team.**  
+    st.image('pages/rotate.png', caption = "From left to right: Emily, Aisha, Erik, and Noah.")
+    st.markdown("""**It's a :fire: team.**  
                         We're in first year iBioMed @ Mac, and Maccessible is our DP4 project that we built for Jany, 
                         a community member with Multiple Sclerosis, so that she could navigate buildings easier.    
                         Pierce is the GOAT.  
@@ -17,8 +17,7 @@ def about_us():
                         Emily: going into Level II iBioMed, specialization: not software, fun fact: She likes green trees.  
                         Aisha: going into Level II iBioMed, specialization: not software, fun fact: She also likes green trees, but she's allergic to them.  
                         **If you want to contact us, go check out Dr McDonald's contact info.**""")
-    sep[1].image('pages/rotate.png', caption = "From left to right: Emily, Aisha, Erik, and Noah.")
-
+    
 sidebar()
 help_button()
 about_us()
