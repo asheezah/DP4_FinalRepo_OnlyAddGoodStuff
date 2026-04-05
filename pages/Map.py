@@ -407,7 +407,7 @@ def backend_main():
     for i in list(places.keys()):
         #Hallway is a node, but we don't want the user to select it
         if i != 'hallway':
-            select.append(i.capitalize())
+            select.append(i)
     destination = st.selectbox("Select your **desired** destination:", select)
 
     #Determine mode
