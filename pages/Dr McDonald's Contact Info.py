@@ -16,4 +16,5 @@ def contact_us():
     col1.write("Disclaimer: Permission has been sought to use this epic photo.")
 
 sidebar()
+help_button()
 contact_us()
