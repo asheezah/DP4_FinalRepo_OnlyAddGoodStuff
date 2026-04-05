@@ -17,7 +17,9 @@ def home():
     #unfortunately don't have emojis
     sidebar()
 
-    st.image('pages/Summit_Logo.png')
+    placeholder = st.columns([1, 2])
+    placeholder[0].image('pages/Summit_Logo.png', use_container_width=True)
+    placeholder[1].title(':maroon[SUMMIT]')
     st.divider()
     st.markdown("""
             <h2 style = "text-align: center; color: maroon;">The future of accessible navigation, <br> at the click of a button.</h2>
