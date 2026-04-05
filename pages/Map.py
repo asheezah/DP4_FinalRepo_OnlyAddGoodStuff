@@ -6,6 +6,7 @@ import requests
 import smtplib
 import folium
 import webbrowser
+import numpy
 from geopy.geocoders import Nominatim
 from streamlit_extras.floating_button import *
 from folium.raster_layers import ImageOverlay
@@ -30,7 +31,7 @@ def weather_warning(user_latitude, user_longitude, error):
 
     ##Convert latitude and longitude to city
     def get_city(latitude, longitude):
-        geolocate = Nominatim(user_agent="DP4_student_project")
+        geolocate = Nominatim(user_agent="student_project")
         coords = [latitude, longitude]
         location = geolocate.reverse(coords)
         full_geocode = location.raw['address']
