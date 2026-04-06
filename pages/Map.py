@@ -386,7 +386,7 @@ def backend_main(user_lat, user_long, error):
 
     if error == False:
         user_coords = [user_long, user_lat]
-    if error == True:
+    else:
         user_coords = [43.263407, -79.917609]
         st.toast("Could not get geolocation, preset applied", icon = "🚨")
 
