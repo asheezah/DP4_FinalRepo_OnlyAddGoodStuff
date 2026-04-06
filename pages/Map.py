@@ -388,7 +388,7 @@ def backend_main(user_lat, user_long, error):
         user_coords = [user_lat, user_long]
     else:
         user_coords = [43.263407, -79.917609]
-        st.toast("Could not get geolocation, preset applied", icon = "🚨")
+        st.markdown(":red[Could not get geolocation, preset applied!]")
 
     #Intialize a session state for markers so that they appear on map across reruns
     #initialize a session state for the polyline (pathfinding) route so that it appears across reruns
