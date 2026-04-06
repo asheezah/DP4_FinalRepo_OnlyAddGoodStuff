@@ -386,7 +386,7 @@ def backend_main(user_lat, user_long):
 
     #Coordinates hardcoded for testing purposes
     
-    user_coords = [user_lat, user_long]
+    user_coords = [user_long, user_lat]
 
     #Intialize a session state for markers so that they appear on map across reruns
     #initialize a session state for the polyline (pathfinding) route so that it appears across reruns
