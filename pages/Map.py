@@ -222,19 +222,6 @@ def report(user_latitude, user_longitude, error):
             else:
                 st.toast("Email Couldn't Send...")
 
-#1: GET GEOLOCATION
-# def get_geocoords():
-#     user_location = get_geolocation()
-#     if user_location and 'error' in user_location:
-#         if user_location['error']['code'] == 1:
-#             st.error("Couldn't get location, sorry")
-#         else: st.warning(f"Geolocation error: {user_location['error']['message']}")
-#     elif user_location:
-#         user_latitude = user_location['coords']['latitude']
-#         user_longitude = user_location['coords']['longitude']    
-#     user_location_json = get_page_location()
-#     return (user_latitude, user_longitude)
-
 
 #2: MAP
 def make_map():

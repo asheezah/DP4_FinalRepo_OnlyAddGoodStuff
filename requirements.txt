@@ -5,3 +5,4 @@ geopy
 streamlit_js_eval
 networkx
 streamlit_extras
+requests
